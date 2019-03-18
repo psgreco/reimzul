@@ -50,7 +50,6 @@ def main():
       jbody['status'] = 'Building'
       jbody['builder_fqdn'] = builder_fqdn
 
-      print "building %s for arch %s on builder %s" % (jbody['srpm'],jbody['arch'],builder_fqdn)
       timestamp = os.popen('date +%Y%m%d%H%M%S').read().strip('\n')
       tmp_dir = tempfile.mkdtemp()
       remote_srpm = srpm_baseurl + jbody['srpm']
@@ -61,6 +60,16 @@ def main():
       ts.setVSFlags(rpm._RPMVSF_NOSIGNATURES)
       hdr = ts.hdrFromFdno(rpm_file)
       os.close(rpm_file)
+
+      # if the package is noarch, build as noarch, only in x86_64
+      if jbody['arch'] != 'noarch'
+        build_arch=hdr[rpm.RPMTAG_BUILDARCHS]
+        if build_arch == 'noarch':
+          if builder_arch != 'x86_64':
+              continue
+          jbody['arch'] = build_arch
+
+      print "building %s for arch %s on builder %s" % (jbody['srpm'],jbody['arch'],builder_fqdn)
       jbody['evr'] = hdr[rpm.RPMTAG_VERSION] +'-'+ hdr[rpm.RPMTAG_RELEASE]
       jbody['pkgname'] = hdr[rpm.RPMTAG_NAME]
       jbody['timestamp'] = timestamp  
