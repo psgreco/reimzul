@@ -6,7 +6,7 @@ import sys
 import argparse
 import getpass
 
-# Build queue dictionnary : arched asked and mapped to queue
+# Build queue dictionary : arched asked and mapped to queue
 build_queues = {'x86_64': 'x86_64', 'noarch': 'noarch', 'armhfp': 'armv7l', 'aarch64': 'aarch64', 'i386': 'i386', 'i686': 'i386', 'ppc64': 'ppc64', 'ppc64le': 'ppc64le', 'ppc': 'ppc'}
 
 parser = argparse.ArgumentParser(description='Reimzul CentOS distributed build client')
@@ -26,17 +26,23 @@ else:
   bs_priority = 8192
 
 bs = beanstalkc.Connection()
-job = {}
-job['srpm'] = results.srpm
-job['arch'] = results.arch
-job['target'] = results.target+'.'+results.arch
-job['disttag'] = results.disttag
-job['scratch'] = results.scratch
-job['submitter'] = getpass.getuser()
-build_queue = build_queues[results.arch]
 
-bs.use(build_queue)
-bs.put(json.dumps(job), priority=bs_priority)
+if results.arch == 'all':
+  build_arches = {'x86_64', 'noarch', 'armhfp', 'aarch64', 'ppc64', 'ppc64le'}
+else:
+  build_arches = {result.arch}
 
-print 'Submitted SRPM %s to build queue %s for target %s (scratch: %s) by %s' % (results.srpm,build_queue,job['target'],job['scratch'],job['submitter'])
+for arch in build_arches:
+  job = {}
+  job['srpm'] = results.srpm
+  job['arch'] = arch
+  job['target'] = results.target+'.'+arch
+  job['disttag'] = results.disttag
+  job['scratch'] = results.scratch
+  job['submitter'] = getpass.getuser()
+  build_queue = build_queues[arch]
 
+  bs.use(build_queue)
+  bs.put(json.dumps(job), priority=bs_priority)
+
+  print 'Submitted SRPM %s to build queue %s for target %s (scratch: %s) by %s' % (results.srpm,build_queue,job['target'],job['scratch'],job['submitter'])
