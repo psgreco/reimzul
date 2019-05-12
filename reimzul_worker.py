@@ -59,12 +59,19 @@ def main():
       rpm_file = os.open(local_srpm, os.O_RDONLY)
       ts = rpm.ts()
       ts.setVSFlags(rpm._RPMVSF_NOSIGNATURES)
-      hdr = ts.hdrFromFdno(rpm_file)
+      jbody['timestamp'] = timestamp
+      hdr = None
+      try:
+        hdr = ts.hdrFromFdno(rpm_file)
+        jbody['evr'] = hdr[rpm.RPMTAG_VERSION] +'-'+ hdr[rpm.RPMTAG_RELEASE]
+        jbody['pkgname'] = hdr[rpm.RPMTAG_NAME]
+      except:
+        jbody['status'] = 'Failed'
+        print "File %s not found on builder %s" % (jbody['srpm'],builder_fqdn)
       os.close(rpm_file)
-      jbody['evr'] = hdr[rpm.RPMTAG_VERSION] +'-'+ hdr[rpm.RPMTAG_RELEASE]
-      jbody['pkgname'] = hdr[rpm.RPMTAG_NAME]
-      jbody['timestamp'] = timestamp  
       bs_notify(bs,jbody)
+      if hdr is None:
+        continue
 
       # launching job
       build_cmd = "/srv/reimzul/code/submit_mock.sh -s %s -d %s -t %s -a %s -p %s" % (local_srpm, jbody['disttag'], jbody['target'], jbody['arch'], timestamp)
