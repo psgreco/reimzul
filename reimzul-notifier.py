@@ -158,7 +158,10 @@ def main():
       if jbody['status'] == 'Success' or jbody['status'] == 'Failed':
         if not jbody['scratch']:
           if mail_notifications:
-            sendmail(jbody)
+            try:
+              sendmail(jbody)
+            except:
+              print "Error sending mail"
           if mqtt_notifications:
             log2mqtt(jbody)
           bs_tosign(bs,jbody)
