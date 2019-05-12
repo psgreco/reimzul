@@ -60,6 +60,8 @@ def main():
       ts = rpm.ts()
       ts.setVSFlags(rpm._RPMVSF_NOSIGNATURES)
       jbody['timestamp'] = timestamp
+      jbody['evr'] = jbody['srpm']
+      jbody['pkgname'] = jbody['srpm']
       hdr = None
       try:
         hdr = ts.hdrFromFdno(rpm_file)
