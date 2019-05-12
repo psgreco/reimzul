@@ -30,7 +30,7 @@ bs = beanstalkc.Connection()
 if results.arch == 'all':
   build_arches = {'x86_64', 'noarch', 'armhfp', 'aarch64', 'ppc64', 'ppc64le'}
 else:
-  build_arches = {result.arch}
+  build_arches = {results.arch}
 
 for arch in build_arches:
   job = {}
