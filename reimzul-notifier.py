@@ -145,6 +145,14 @@ def main():
       bs_connection = True
       job = bs.reserve()
       jbody = json.loads(job.body)
+      try:
+        t=jbody['evr']
+      except:
+        jbody['evr'] = jbody['srpm']
+      try:
+        t=jbody['pkgname']
+      except:
+        jbody['pkgname'] = jbody['srpm']
       log2file(jbody)
       log2mongo(jbody)
       if jbody['status'] == 'Success' or jbody['status'] == 'Failed':
